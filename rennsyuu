@@ -1,0 +1,64 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+namespace ECOSERVER
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {   //127.0.0.1 자신
+            string      bindIp = "192.168.133.96";    // 내 Ip 
+            const int   bindPort = 5426;
+            TcpListener server = null;      //server를 만들어주는 class - 서버 생성
+            // TcpListener 이용하여 서버 생성
+            try
+            {
+                IPEndPoint localAddress =
+                   new IPEndPoint(IPAddress.Parse(bindIp), bindPort);    // Parse -  변환기능, Parse(bindIP) - 32비트의 인터넷 주소 생성
+                server = new TcpListener(localAddress);                   // 객체를 이용해  server 생성
+                server.Start();     // server 실행
+                Console.WriteLine("메아리 서버 시작..");
+                // server 는 무한루프 이므로
+                while (true)
+                {
+                    TcpClient client = server.AcceptTcpClient();          // new 가 아니라  우리가 만든 서버로 접속하는 클라이언트
+                    Console.WriteLine("클라이언트 접속 :{0}",
+                        ((IPEndPoint)client.Client.RemoteEndPoint).ToString());
+                    NetworkStream stream = client.GetStream();
+                    int length;
+                    string data = null;
+                    byte[] bytes = new byte[256];
+                    // 클라이언트로부터 도착하는 패킷이 있다면 while이 계속 구동
+                    while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
+                    {
+                        // 데이터 읽기
+                        data = Encoding.Default.GetString(bytes, 0, length);
+
+                        // 받은 data를 화면에 다시 출력 - 메아리
+                        Console.WriteLine(String.Format("수신:{0}", data));
+
+                        // 클라이언트로 데이터 보내기 (byte 형식으로)
+                        byte[] msg = Encoding.Default.GetBytes(data);
+                        stream.Write(msg, 0, msg.Length);
+
+                        // 송신한 데이터 화면에 출력
+                        Console.WriteLine(string.Format("송신 :{0}", data));
+                        stream.Close();
+                        client.Close();
+                    }
+                }
+            } catch(SocketException e)
+            {
+            }
+            finally
+            {
+                server.Stop();
+            }
+            Console.WriteLine("서버를 종료합니다.");
+        } // End of Main()
+    }     // End of class
+}         // End of namespace
