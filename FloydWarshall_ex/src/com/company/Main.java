@@ -16,7 +16,6 @@ import java.util.Scanner;
 
  --- 예제문제 ---
  'A에서 B로 가는 최소 비용'과 'A에서 K를 거쳐 B로 가는 비용'을 고려하여 더 작은 값으로 나타내기
-
  */
 public class Main {
     public static final int INF = (int)1e9;
